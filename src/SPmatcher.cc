@@ -28,6 +28,8 @@
 #include "Thirdparty/DBoW2/DBoW2/FeatureVector.h"
 
 #include<stdint-gcc.h>
+#include <iostream>
+#include <fstream>
 
 using namespace std;
 
@@ -406,7 +408,7 @@ int SPmatcher::SearchForInitialization(Frame &F1, Frame &F2, vector<cv::Point2f>
 {
     int nmatches=0;
     vnMatches12 = vector<int>(F1.mvKeysUn.size(),-1);
-
+    
     vector<int> rotHist[HISTO_LENGTH];
     for(int i=0;i<HISTO_LENGTH;i++)
         rotHist[i].reserve(500);
@@ -428,6 +430,19 @@ int SPmatcher::SearchForInitialization(Frame &F1, Frame &F2, vector<cv::Point2f>
             continue;
 
         cv::Mat d1 = F1.mDescriptors.row(i1);
+
+        // Open a file for writing
+        std::ofstream file("vectors.txt", std::ios_base::app);
+        if (!file.is_open()) {
+            std::cerr << "Unable to open the file for writing." << std::endl;
+            return 1;
+        }
+
+        // Write the vectors to the file    
+        file << F1.mDescriptors.row(i1) << std::endl;
+        // Close the file
+        file.close();
+        std::cout << "Vectors saved to the file 'vectors.txt'." << std::endl;
 
         float bestDist = INT_MAX;
         float bestDist2 = INT_MAX;

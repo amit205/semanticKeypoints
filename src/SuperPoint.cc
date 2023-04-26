@@ -81,10 +81,10 @@ namespace ORB_SLAM2
         img.convertTo(imgConvert, CV_32F, 1.f / 255.f);
         int width = img.cols;
         int height = img.rows;
-        int width_c = width/16;
-        int height_c = height/16;
+        int width_c = width/8;
+        int height_c = height/8;
         cv::Mat imgResized;
-        cv::resize(imgConvert, imgResized, cv::Size(width_c*16, height_c*16), cv::INTER_CUBIC);
+        cv::resize(imgConvert, imgResized, cv::Size(width_c*8, height_c*8), cv::INTER_CUBIC);
         //std::cout<<"Resized Image size: " << imgResized.size() << std::endl;
         //cv::imshow("Input",imgResized);
         //cv::waitKey(0);

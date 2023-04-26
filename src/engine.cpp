@@ -92,13 +92,13 @@ bool Engine::build(std::string onnxModelPath, int level) {
           //  inputH = 370;
           //  inputW = 1226;
             inputH = 368;
-            inputW = 1216;
+            inputW = 1224;
             break;
         case 1:
           //  inputH = 308;
           //  inputW = 1022;
             inputH = 304;
-            inputW = 1008;
+            inputW = 1016;
             break;
         case 2:
           //  inputH = 257;
