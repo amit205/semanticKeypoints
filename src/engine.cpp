@@ -4,8 +4,11 @@
 #include "engine.h"
 #include "NvOnnxParser.h"
 
+using namespace nvinfer1;
+
 namespace ORB_SLAM2
 {
+
 
 void Logger::log(Severity severity, const char *msg) noexcept {
     // Would advise using a proper logging utility such as https://github.com/gabime/spdlog
@@ -91,29 +94,52 @@ bool Engine::build(std::string onnxModelPath, int level) {
         case 0:
           //  inputH = 370;
           //  inputW = 1226;
-            inputH = 368;
-            inputW = 1224;
+            inputH = 376; //kitti360 //368;//kitti
+            inputW = 1408;//kitti360  1224;//kitti
             break;
         case 1:
           //  inputH = 308;
           //  inputW = 1022;
-            inputH = 304;
-            inputW = 1016;
+            inputH = 312; //304;
+            inputW = 1168; //1016;
             break;
         case 2:
           //  inputH = 257;
           //  inputW = 851;
             inputH = 256;
-            inputW = 848;
+            inputW = 976; //848;
             break;
         case 3:
           //  inputH = 214;
           //  inputW = 709;
-            inputH = 208;
-            inputW = 704;
+            inputH = 216; //208;
+            inputW = 808; //704;
+            break;
+        case 4: 
+          //  inputH = 178;
+          //  inputW = 591;
+            inputH = 176;
+            inputW = 672; //584;
+            break;
+        case 5:
+          //  inputH = 149;
+          //  inputW = 493;
+            inputH = 144;
+            inputW = 560;//488;
+            break;
+        case 6:
+          //  inputH = 124;
+          //  inputW = 411;
+            inputH = 120;
+            inputW = 472; //408;
+            break;
+        case 7:
+          //  inputH = 103;
+          //  inputW = 342;
+            inputH = 104; //96;
+            inputW = 392;//336;
             break;
     }
-
     auto config = TRTUniquePtr<nvinfer1::IBuilderConfig>(builder->createBuilderConfig());
     if (!config) {
         return false;
@@ -233,23 +259,19 @@ bool Engine::runInference(const std::vector<cv::Mat> &inputFaceChips, std::vecto
     if (!m_context->allInputDimensionsSpecified()) {
         throw std::runtime_error("Error, not all input dimensions specified.");
     }
-
-    auto outputIndex_descriptor_raw = m_engine->getBindingIndex("descriptor_head");
-    auto outputL_descriptor_raw = m_engine->getBindingDimensions(outputIndex_descriptor_raw);
-    Dims4 outputDims_descriptor_raw = {static_cast<int32_t>(inputFaceChips.size()), img.size[0]/8, img.size[1]/8, outputL_descriptor_raw.d[3]};
-  
-
-    //auto outputIndex_descriptor = m_engine->getBindingIndex("descriptor_head_1");
-    //auto outputL_descriptor = m_engine->getBindingDimensions(outputIndex_descriptor);
     
     auto outputIndex_detector_logits = m_engine->getBindingIndex("detector_head");
     auto outputL_detector_logits = m_engine->getBindingDimensions(outputIndex_detector_logits);
     Dims4 outputDims_detector_logits = {static_cast<int32_t>(inputFaceChips.size()), img.size[0]/8, img.size[1]/8, outputL_detector_logits.d[3]};
-   
 
+    auto outputIndex_descriptor_raw = m_engine->getBindingIndex("descriptor_head");
+    auto outputL_descriptor_raw = m_engine->getBindingDimensions(outputIndex_descriptor_raw);
+    Dims4 outputDims_descriptor_raw = {static_cast<int32_t>(inputFaceChips.size()), img.size[0]/8, img.size[1]/8, outputL_descriptor_raw.d[3]};
+    
     auto outputIndex_detector = m_engine->getBindingIndex("detector_head_1");
     auto outputL_detector = m_engine->getBindingDimensions(outputIndex_detector);    
     Dims3 outputDims_detector = {static_cast<int32_t>(inputFaceChips.size()), img.size[0], img.size[1]};
+     
   
     // comment out following if loading SuperPoint model
     //auto outputIndex_segmentation = m_engine->getBindingIndex("segmentation_head");
@@ -265,9 +287,6 @@ bool Engine::runInference(const std::vector<cv::Mat> &inputFaceChips, std::vecto
 
         m_outputBuff_descriptor_raw.hostBuffer.resize(outputDims_descriptor_raw);
         m_outputBuff_descriptor_raw.deviceBuffer.resize(outputDims_descriptor_raw);
-
-        //m_outputBuff_descriptor.hostBuffer.resize(outputDims_descriptor);
-        //m_outputBuff_descriptor.deviceBuffer.resize(outputDims_descriptor);
 
         m_outputBuff_detector_logits.hostBuffer.resize(outputDims_detector_logits);
         m_outputBuff_detector_logits.deviceBuffer.resize(outputDims_detector_logits);
@@ -307,27 +326,22 @@ bool Engine::runInference(const std::vector<cv::Mat> &inputFaceChips, std::vecto
         return false;
     }
 
-    std::vector<void*> predictionBindings = {m_inputBuff.deviceBuffer.data(), m_outputBuff_detector_logits.deviceBuffer.data(),m_outputBuff_detector.deviceBuffer.data(),m_outputBuff_descriptor_raw.deviceBuffer.data()};//, m_outputBuff_segmentation.deviceBuffer.data()}; //,m_outputBuff_descriptor.deviceBuffer.data() };
+    std::vector<void*> predictionBindings = {m_inputBuff.deviceBuffer.data(), m_outputBuff_detector_logits.deviceBuffer.data(), m_outputBuff_detector.deviceBuffer.data(), m_outputBuff_descriptor_raw.deviceBuffer.data()};//, m_outputBuff_segmentation.deviceBuffer.data()};
     // Run inference.
     bool status = m_context->enqueueV2(predictionBindings.data(), m_cudaStream, nullptr);
     if (!status) {
         return false;
     }
     // Copy the results back to CPU memory
-    /*
-    ret = cudaMemcpyAsync(m_outputBuff_descriptor.hostBuffer.data(), m_outputBuff_descriptor.deviceBuffer.data(), m_outputBuff_descriptor.deviceBuffer.nbBytes(), cudaMemcpyDeviceToHost, m_cudaStream);
-    if (ret != 0) {
-        std::cout << "Unable to copy descriptor buffer from GPU back to CPU" << std::endl;
-        return false;
-    }*/
-    ret = cudaMemcpyAsync(m_outputBuff_descriptor_raw.hostBuffer.data(), m_outputBuff_descriptor_raw.deviceBuffer.data(), m_outputBuff_descriptor_raw.deviceBuffer.nbBytes(), cudaMemcpyDeviceToHost, m_cudaStream);
-    if (ret != 0) {
-        std::cout << "Unable to copy descriptor_raw buffer from GPU back to CPU" << std::endl;
-        return false;
-    }
+    
     ret = cudaMemcpyAsync(m_outputBuff_detector_logits.hostBuffer.data(), m_outputBuff_detector_logits.deviceBuffer.data(), m_outputBuff_detector_logits.deviceBuffer.nbBytes(), cudaMemcpyDeviceToHost, m_cudaStream);
     if (ret != 0) {
         std::cout << "Unable to copy detector_logits buffer from GPU back to CPU" << std::endl;
+        return false;
+    }
+    ret = cudaMemcpyAsync(m_outputBuff_descriptor_raw.hostBuffer.data(), m_outputBuff_descriptor_raw.deviceBuffer.data(), m_outputBuff_descriptor_raw.deviceBuffer.nbBytes(), cudaMemcpyDeviceToHost, m_cudaStream);
+    if (ret != 0) {
+        std::cout << "Unable to copy descriptor_raw buffer from GPU back to CPU" << std::endl;
         return false;
     }
     ret = cudaMemcpyAsync(m_outputBuff_detector.hostBuffer.data(), m_outputBuff_detector.deviceBuffer.data(), m_outputBuff_detector.deviceBuffer.nbBytes(), cudaMemcpyDeviceToHost, m_cudaStream);
@@ -335,6 +349,7 @@ bool Engine::runInference(const std::vector<cv::Mat> &inputFaceChips, std::vecto
         std::cout << "Unable to copy detector buffer from GPU back to CPU" << std::endl;
         return false;
     }
+
     // comment out following if loading SuperPoint model
     /*
     ret = cudaMemcpyAsync(m_outputBuff_segmentation.hostBuffer.data(), m_outputBuff_segmentation.deviceBuffer.data(), m_outputBuff_segmentation.deviceBuffer.nbBytes(), cudaMemcpyDeviceToHost, m_cudaStream);
@@ -350,13 +365,11 @@ bool Engine::runInference(const std::vector<cv::Mat> &inputFaceChips, std::vecto
     // Copy to output 
     for (int batch = 0; batch < batchSize; ++batch) {
         int dims_descriptor_raw[] = { outputDims_descriptor_raw.d[1], outputDims_descriptor_raw.d[2], outputDims_descriptor_raw.d[3] };
-        //int dims_descriptor[] = { outputL_descriptor.d[1], outputL_descriptor.d[2], outputL_descriptor.d[3] };
         int dims_detector_logits[] = { outputDims_detector_logits.d[1], outputDims_detector_logits.d[2], outputDims_detector_logits.d[3] };
         int dims_detector[] = { outputDims_detector.d[1], outputDims_detector.d[2] };
         //int dims_segmentation[] = { outputDims_segmentation.d[1], outputDims_segmentation.d[2], outputDims_segmentation.d[3] };
 
         cv::Mat featureVector_descriptor_raw(3, dims_descriptor_raw, CV_32F);
-        //cv::Mat featureVector_descriptor(3, dims_descriptor, CV_32F);
         cv::Mat featureVector_detector_logits(3, dims_detector_logits, CV_32F);
         cv::Mat featureVector_detector(2, dims_detector, CV_32F);
         //cv::Mat featureVector_segmentation(3, dims_segmentation, CV_32F);
@@ -364,11 +377,7 @@ bool Engine::runInference(const std::vector<cv::Mat> &inputFaceChips, std::vecto
         memcpy(featureVector_descriptor_raw.data, reinterpret_cast<float*>(m_outputBuff_descriptor_raw.hostBuffer.data()) +
             batch * outputL_descriptor_raw.d[1] * outputL_descriptor_raw.d[2] * outputL_descriptor_raw.d[3] * sizeof(float), outputL_descriptor_raw.d[1] * outputL_descriptor_raw.d[2] * outputL_descriptor_raw.d[3] * sizeof(float));
         featureVectors_descriptor_raw.emplace_back(std::move(featureVector_descriptor_raw));
-        /*
-        memcpy(featureVector_descriptor.data, reinterpret_cast<float*>(m_outputBuff_descriptor.hostBuffer.data()) +
-        batch * outputL_descriptor.d[1] * outputL_descriptor.d[2] * outputL_descriptor.d[3] * sizeof(float), outputL_descriptor.d[1] * outputL_descriptor.d[2] * outputL_descriptor.d[3] * sizeof(float ));
-        featureVectors_descriptor.emplace_back(std::move(featureVector_descriptor));
-        */
+        
         memcpy(featureVector_detector_logits.data, reinterpret_cast<float*>(m_outputBuff_detector_logits.hostBuffer.data()) +
             batch * outputL_detector_logits.d[1] * outputL_detector_logits.d[2] * outputL_detector_logits.d[3] * sizeof(float), outputL_detector_logits.d[1] * outputL_detector_logits.d[2] * outputL_detector_logits.d[3] * sizeof(float));
         featureVectors_detector_logits.emplace_back(std::move(featureVector_detector_logits));

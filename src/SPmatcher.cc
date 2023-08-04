@@ -36,8 +36,8 @@ using namespace std;
 namespace ORB_SLAM2
 {
  
-const float SPmatcher::TH_HIGH = 35;
-const float SPmatcher::TH_LOW = 1;
+const float SPmatcher::TH_HIGH = 1;
+const float SPmatcher::TH_LOW = 0.5;
 const int SPmatcher::HISTO_LENGTH = 30;
 
 SPmatcher::SPmatcher(float nnratio, bool checkOri): mfNNratio(nnratio), mbCheckOrientation(checkOri)
@@ -430,7 +430,7 @@ int SPmatcher::SearchForInitialization(Frame &F1, Frame &F2, vector<cv::Point2f>
             continue;
 
         cv::Mat d1 = F1.mDescriptors.row(i1);
-
+        /*
         // Open a file for writing
         std::ofstream file("vectors.txt", std::ios_base::app);
         if (!file.is_open()) {
@@ -443,7 +443,7 @@ int SPmatcher::SearchForInitialization(Frame &F1, Frame &F2, vector<cv::Point2f>
         // Close the file
         file.close();
         std::cout << "Vectors saved to the file 'vectors.txt'." << std::endl;
-
+        */
         float bestDist = INT_MAX;
         float bestDist2 = INT_MAX;
         int bestIdx2 = -1;
@@ -455,7 +455,6 @@ int SPmatcher::SearchForInitialization(Frame &F1, Frame &F2, vector<cv::Point2f>
             cv::Mat d2 = F2.mDescriptors.row(i2);
 
             float dist = DescriptorDistance(d1,d2);
-
             if(vMatchedDistance[i2]<=dist)
                 continue;
 
@@ -1682,7 +1681,7 @@ void SPmatcher::ComputeThreeMaxima(vector<int>* histo, const int L, int &ind1, i
 float SPmatcher::DescriptorDistance(const cv::Mat &a, const cv::Mat &b)
 {
     float dist = (float)cv::norm(a, b, cv::NORM_L2);
-
+    //std::cout << dist << std::endl;
     return dist;
 }
 

@@ -23,7 +23,6 @@
 #include <list>
 #include <opencv2/opencv.hpp>
 
-#include <torch/torch.h>
 #include "SuperPoint.h"
 #include "engine.h"
 #ifdef EIGEN_MPL2_ONLY
@@ -127,6 +126,10 @@ namespace ORB_SLAM2
         std::shared_ptr<SuperPoint> model_engine2;
         std::shared_ptr<SuperPoint> model_engine3;
         std::shared_ptr<SuperPoint> model_engine4;
+        std::shared_ptr<SuperPoint> model_engine5;
+        std::shared_ptr<SuperPoint> model_engine6;
+        std::shared_ptr<SuperPoint> model_engine7;
+        std::shared_ptr<SuperPoint> model_engine8;
     };
 
     typedef SPextractor ORBextractor;

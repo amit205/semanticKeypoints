@@ -8,17 +8,25 @@ namespace ORB_SLAM2
     SuperPoint model_engine2(options);
     SuperPoint model_engine3(options);
     SuperPoint model_engine4(options);
+    SuperPoint model_engine5(options);
+    SuperPoint model_engine6(options);
+    SuperPoint model_engine7(options);
+    SuperPoint model_engine8(options);
 
     void NMS(cv::Mat det, cv::Mat conf, cv::Mat desc, std::vector<cv::KeyPoint> &pts, cv::Mat &descriptors,
              int border, int dist_thresh, int img_width, int img_height);
     void NMS2(std::vector<cv::KeyPoint> det, cv::Mat conf, std::vector<cv::KeyPoint> &pts,
               int border, int dist_thresh, int img_width, int img_height);
 
-    SPDetector::SPDetector(std::shared_ptr<SuperPoint> _model_engine) 
-    : model_engine1(_model_engine),
-      model_engine2(_model_engine),
-      model_engine3(_model_engine), 
-      model_engine4(_model_engine)    
+    SPDetector::SPDetector(std::shared_ptr<SuperPoint> _model_engine)
+        : model_engine1(_model_engine),
+          model_engine2(_model_engine),
+          model_engine3(_model_engine),
+          model_engine4(_model_engine),
+          model_engine5(_model_engine),
+          model_engine6(_model_engine),
+          model_engine7(_model_engine),
+          model_engine8(_model_engine)
     {
     }
 
@@ -61,79 +69,110 @@ namespace ORB_SLAM2
     void SPDetector::detect(cv::Mat &img, bool cuda, int level)
 
     {
-        
+
         std::vector<cv::Mat> images;
         std::vector<cv::Mat> featureVectors_descriptor_raw;
-        //std::vector<cv::Mat> featureVectors_descriptor;
         std::vector<cv::Mat> featureVectors_detector_logits;
         std::vector<cv::Mat> featureVectors_detector;
         // comment out following if loading SuperPoint model
-        //std::vector<cv::Mat> featureVectors_segmentation;
+        // std::vector<cv::Mat> featureVectors_segmentation;
         featureVectors_descriptor_raw.clear();
-        //featureVectors_descriptor.clear();
         featureVectors_detector_logits.clear();
         featureVectors_detector.clear();
         // comment out following if loading SuperPoint model
-        //featureVectors_segmentation.clear();
+        // featureVectors_segmentation.clear();
         images.clear();
-        std::cout<<"Image size: " << img.size() << std::endl;
+        //std::cout << "Image size: " << img.size() << std::endl;
         cv::Mat imgConvert;
         img.convertTo(imgConvert, CV_32F, 1.f / 255.f);
         int width = img.cols;
         int height = img.rows;
-        int width_c = width/8;
-        int height_c = height/8;
+        int width_c = width / 8;
+        int height_c = height / 8;
         cv::Mat imgResized;
-        cv::resize(imgConvert, imgResized, cv::Size(width_c*8, height_c*8), cv::INTER_CUBIC);
-        //std::cout<<"Resized Image size: " << imgResized.size() << std::endl;
-        //cv::imshow("Input",imgResized);
-        //cv::waitKey(0);
-        images.push_back(imgResized);      
+        cv::resize(imgConvert, imgResized, cv::Size(width_c * 8, height_c * 8), cv::INTER_LINEAR);
+        //std::cout << "Resized Image size: " << imgResized.size() << std::endl;
+        // cv::imshow("Input",imgResized);
+        // cv::waitKey(1);
+        images.push_back(imgResized);
         bool succ;
-        for (int level = 0; level < 4; ++level)  //nlevels = 4
+
+        switch (level)
         {
-            switch (level) {
-                case 0:
-                {
-                    succ = model_engine1->runInference(images, featureVectors_descriptor_raw, featureVectors_detector_logits, featureVectors_detector);//, featureVectors_segmentation);
-                    if (!succ)
-                    {
-                        throw std::runtime_error("Unable to run semanticKeypoints inference.");
-                        }
-                    break;
-                }
-                case 1:
-                {
-                    succ = model_engine2->runInference(images, featureVectors_descriptor_raw, featureVectors_detector_logits, featureVectors_detector);//, featureVectors_segmentation);
-                    if (!succ)
-                    {
-                        throw std::runtime_error("Unable to run semanticKeypoints inference.");
-                        }
-                    break;
-                }
-                case 2:
-                {
-                    succ = model_engine3->runInference(images, featureVectors_descriptor_raw, featureVectors_detector_logits, featureVectors_detector);//, featureVectors_segmentation);
-                    if (!succ)
-                    {
-                        throw std::runtime_error("Unable to run semanticKeypoints inference.");
-                        }
-                    break;
-                }
-                case 3:
-                {
-                    succ = model_engine4->runInference(images, featureVectors_descriptor_raw, featureVectors_detector_logits, featureVectors_detector);//, featureVectors_segmentation);
-                    if (!succ)
-                    {
-                        throw std::runtime_error("Unable to run semanticKeypoints inference.");
-                        }
-                    break;
-                }
-                    }
+        case 0:
+        {
+            succ = model_engine1->runInference(images, featureVectors_descriptor_raw, featureVectors_detector_logits, featureVectors_detector); //, featureVectors_segmentation);
+            if (!succ)
+            {
+                throw std::runtime_error("Unable to run semanticKeypoints inference.");
+            }
+            break;
+        }
+        case 1:
+        {
+            succ = model_engine2->runInference(images, featureVectors_descriptor_raw, featureVectors_detector_logits, featureVectors_detector); //, featureVectors_segmentation);
+            if (!succ)
+            {
+                throw std::runtime_error("Unable to run semanticKeypoints inference.");
+            }
+            break;
+        }
+        case 2:
+        {
+            succ = model_engine3->runInference(images, featureVectors_descriptor_raw, featureVectors_detector_logits, featureVectors_detector); //, featureVectors_segmentation);
+            if (!succ)
+            {
+                throw std::runtime_error("Unable to run semanticKeypoints inference.");
+            }
+            break;
+        }
+        case 3:
+        {
+            succ = model_engine4->runInference(images, featureVectors_descriptor_raw, featureVectors_detector_logits, featureVectors_detector); //, featureVectors_segmentation);
+            if (!succ)
+            {
+                throw std::runtime_error("Unable to run semanticKeypoints inference.");
+            }
+            break;
+        }
+        case 4:
+        {
+            succ = model_engine5->runInference(images, featureVectors_descriptor_raw, featureVectors_detector_logits, featureVectors_detector); //, featureVectors_segmentation);
+            if (!succ)
+            {
+                throw std::runtime_error("Unable to run semanticKeypoints inference.");
+            }
+            break;
+        }
+        case 5:
+        {
+            succ = model_engine6->runInference(images, featureVectors_descriptor_raw, featureVectors_detector_logits, featureVectors_detector); //, featureVectors_segmentation);
+            if (!succ)
+            {
+                throw std::runtime_error("Unable to run semanticKeypoints inference.");
+            }
+            break;
+        }
+        case 6:
+        {
+            succ = model_engine7->runInference(images, featureVectors_descriptor_raw, featureVectors_detector_logits, featureVectors_detector); //, featureVectors_segmentation);
+            if (!succ)
+            {
+                throw std::runtime_error("Unable to run semanticKeypoints inference.");
+            }
+            break;
+        }
+        case 7:
+        {
+            succ = model_engine8->runInference(images, featureVectors_descriptor_raw, featureVectors_detector_logits, featureVectors_detector); //, featureVectors_segmentation);
+            if (!succ)
+            {
+                throw std::runtime_error("Unable to run semanticKeypoints inference.");
+            }
+            break;
+        }
         }
 
-        // mProb = featureVectors_detector; // [H, W]
-        // mDesc = featureVectors_descriptor_raw;             // [1, H/8, W/8, 256]
         bool use_cuda = cuda && torch::cuda::is_available();
         torch::DeviceType device_type;
         if (use_cuda)
@@ -141,92 +180,96 @@ namespace ORB_SLAM2
         else
             device_type = torch::kCPU;
         torch::Device device(device_type);
-        std::vector<cv::Mat> seg_images;
-        std::vector<cv::Mat> descriptor_raw;
-        //std::vector<cv::Mat> descriptor_images;
-        std::vector<cv::Mat> detector_logits;
-        std::vector<cv::Mat> detector_images;
         // comment out following if loading SuperPoint model
-        //cv::Mat segImg(2, featureVectors_segmentation[0].size, CV_32FC1, featureVectors_segmentation[0].data);
+        // cv::Mat segImg(2, featureVectors_segmentation[0].size, CV_32FC1, featureVectors_segmentation[0].data);
         cv::Mat descriptorImg_raw(3, featureVectors_descriptor_raw[0].size, CV_32F, featureVectors_descriptor_raw[0].data);
-        //cv::Mat descriptorImg(3, featureVectors_descriptor[0].size, CV_32F, featureVectors_descriptor[0].data);
         cv::Mat detectorLogits(3, featureVectors_detector_logits[0].size, CV_32F, featureVectors_detector_logits[0].data);
         cv::Mat detectorImg(2, featureVectors_detector[0].size, CV_32FC1, featureVectors_detector[0].data);
-        //std::cout << "Detector output size: "<<detectorImg.size() << std::endl;
-        cv::Mat detectorImg_resize;
-        cv::resize(detectorImg, detectorImg_resize, cv::Size(width, height), cv::INTER_CUBIC);    
-        //std::cout<<"Resized detector output size: " << detectorImg.size() << std::endl;    
-        //cv::imshow("Keypoints",detectorImg>0.015);
-        //cv::waitKey(0);
-        // seg_images.push_back(segImg);
-        //  Convert the input image from channels last to channels first
-        //int sizes[3] = {256, 30, 40};
-        //cv::Mat outputx(3, sizes, CV_32F, cv::Scalar(0));
-        //channelsLastToChannelsFirst(descriptorImg_raw, outputx);
-        descriptor_raw.push_back(descriptorImg_raw);
-        //std::cout << "Descriptor raw output size: "<<descriptorImg_raw.size[0] <<" "<<descriptorImg_raw.size[1]<<" "<< descriptorImg_raw.size[2]<< " "  << std::endl;
-        // descriptor_images.push_back(descriptorImg);
-        // detector_logits.push_back(detectorLogits);
-        detector_images.push_back(detectorImg_resize);
-        //mProb = detector_images[0].clone();
-        //mDesc.push_back(outputx);
-        mProb = torch::zeros({detectorImg_resize.size[0], detectorImg_resize.size[1]}, torch::kF32).to(device);
-        // mDesc = torch::zeros({descriptorImg.size[0], descriptorImg.size[1], descriptorImg.size[2]}, torch::kF32).to(device);
+        // std::cout << "Detector output size: "<<detectorImg.size() << std::endl;
+        cv::resize(detectorImg, detectorImg, cv::Size(width, height), cv::INTER_LINEAR);
+        // std::cout<<"Resized detector output size: " << detectorImg.size() << std::endl;
+        // cv::imshow("Keypoints",detectorImg>0.015);
+        // cv::waitKey(0);
+        //  seg_images.push_back(segImg);
+        //   Convert the input image from channels last to channels first
+        // int sizes[3] = {256, 30, 40};
+        // cv::Mat outputx(3, sizes, CV_32F, cv::Scalar(0));
+        // channelsLastToChannelsFirst(descriptorImg_raw, outputx);
+        // mProb = detectorImg.clone();
+        // mDesc.push_back(outputx);
+
+
+        mProb = torch::zeros({detectorImg.size[0], detectorImg.size[1]}, torch::kF32).to(device);
         mDesc = torch::zeros({descriptorImg_raw.size[0], descriptorImg_raw.size[1], descriptorImg_raw.size[2]}, torch::kF32).to(device);
-        // mProb = torch::from_blob(detectorImg.data, {detectorImg.size[0],detectorImg.size[1]}, torch::kF32).to(device);
-        // mDesc = torch::from_blob(descriptorImg_raw.data, {1, descriptorImg_raw.size[0], descriptorImg_raw.size[1], descriptorImg_raw.size[2] }, torch::kF32).to(device);
-        // mDesc = torch::from_blob(descriptorImg.data, {1, descriptorImg.size[0], descriptorImg.size[1], descriptorImg.size[2] }, torch::kF32).to(device);
+       
         mProb = mProb.set_requires_grad(false);
         mDesc = mDesc.set_requires_grad(false);
-        std::memcpy(mProb.data_ptr(), detector_images[0].data, sizeof(float)*mProb.numel());
-        std::memcpy(mDesc.data_ptr(), descriptor_raw[0].data, sizeof(float)*mDesc.numel());
-
-        /*
-        mProb = mProb.unsqueeze(0);
-        mProb = mProb.contiguous().view({1, height_c, 8, width_c, 8});
-        mProb = mProb.permute({0, 1,3,2,4 });
-        mProb = mProb.contiguous().view({1, height_c, width_c, 64});
-        mProb = mProb.permute({0,3,1,2});
-        mProb = torch::cat({mProb, torch::zeros({1, 1, height_c, width_c}, torch::kF32)}, 1);
-        mProb = torch::softmax(mProb, 1);
-
-        mProb = mProb.slice(1, 0, 64);
-        mProb = mProb.permute({0, 2, 3, 1});
-        int Hc = mProb.size(1);
-        int Wc = mProb.size(2);
-        mProb = mProb.contiguous().view({1, Hc, Wc, 8, 8});
-        mProb = mProb.permute({0, 1, 3, 2, 4});
-        mProb = mProb.contiguous().view({1, Hc * 8, Wc * 8});
-
-        mProb = mProb.squeeze(0);*/
-
+        std::memcpy(mProb.data_ptr(), detectorImg.data, sizeof(float) * mProb.numel());
+        std::memcpy(mDesc.data_ptr(), descriptorImg_raw.data, sizeof(float) * mDesc.numel());
         mDesc = mDesc.unsqueeze(0);
         mDesc = mDesc.permute({0, 3, 1, 2});
-        /*
-        namespace F = torch::nn::functional;
-        mDesc = F::interpolate(mDesc, F::InterpolateFuncOptions().size(std::vector<int64_t>{height, width}).mode(torch::kBicubic));
-        */
 
         auto dn = torch::norm(mDesc, 2, 1);
         mDesc = mDesc.div(torch::unsqueeze(dn, 1));
     }
-/*
-    void SPDetector::getKeyPoints(float threshold, int iniX, int maxX, int iniY, int maxY, std::vector<cv::KeyPoint>& keypoints, bool nms)
-    {
-        
-        auto prob = mProb(cv::Range(iniY, maxY), cv::Range(iniX, maxX)).clone();
-        cv::Mat kpts;
-        cv::threshold(prob, kpts, threshold, 1, cv::THRESH_BINARY);
-        // Find non-zero pixel locations
-        std::vector<cv::Point> non_zero_pixels;
-        cv::findNonZero(kpts, non_zero_pixels);
 
-        std::vector<cv::KeyPoint> keypoints_no_nms;
-        for (int i = 0; i < non_zero_pixels.size(); i++)
+    /*    void SPDetector::getKeyPoints(float threshold, int iniX, int maxX, int iniY, int maxY, std::vector<cv::KeyPoint>& keypoints, bool nms)
         {
-            float response = prob.at<float>(non_zero_pixels[i].y, non_zero_pixels[i].x);
-            // std::cout << response << std::endl;
-            keypoints_no_nms.push_back(cv::KeyPoint(non_zero_pixels[i].x, non_zero_pixels[i].y, 8, -1, response));
+
+            auto prob = mProb(cv::Range(iniY, maxY), cv::Range(iniX, maxX)).clone();
+            cv::Mat kpts;
+            cv::threshold(prob, kpts, threshold, 1, cv::THRESH_BINARY);
+            // Find non-zero pixel locations
+            std::vector<cv::Point> non_zero_pixels;
+            cv::findNonZero(kpts, non_zero_pixels);
+
+            std::vector<cv::KeyPoint> keypoints_no_nms;
+            for (int i = 0; i < non_zero_pixels.size(); i++)
+            {
+                float response = prob.at<float>(non_zero_pixels[i]);
+                // std::cout << response << std::endl;
+                keypoints_no_nms.push_back(cv::KeyPoint(non_zero_pixels[i].x, non_zero_pixels[i].y, 8, -1, response));
+            }
+
+            if (nms)
+            {
+                cv::Mat conf(keypoints_no_nms.size(), 1, CV_32F);
+                for (size_t i = 0; i < keypoints_no_nms.size(); i++)
+                {
+                    int x = keypoints_no_nms[i].pt.x;
+                    int y = keypoints_no_nms[i].pt.y;
+                    conf.at<float>(i, 0) = prob.at<float>(y, x);
+                }
+
+                // cv::Mat descriptors;
+
+                int border = 0;
+                int dist_thresh = 4;
+                int height = maxY - iniY;
+                int width = maxX - iniX;
+
+                NMS2(keypoints_no_nms, conf, keypoints, border, dist_thresh, width, height);
+            }
+            else
+            {
+                keypoints = keypoints_no_nms;
+            }
+        }*/
+
+    void SPDetector::getKeyPoints(float threshold, int iniX, int maxX, int iniY, int maxY, std::vector<cv::KeyPoint> &keypoints, bool nms)
+    {
+        auto prob = mProb.slice(0, iniY, maxY).slice(1, iniX, maxX); // [h, w]
+        auto kpts = (prob > threshold);
+        kpts = torch::nonzero(kpts); // [n_keypoints, 2]  (y, x)
+        std::vector<cv::KeyPoint> keypoints_no_nms;
+        for (int i = 0; i < kpts.size(0); i++)
+        {
+            float response = prob[kpts[i][0]][kpts[i][1]].item<float>();
+            // std::cout << "response: "<<response <<std::endl;
+            keypoints_no_nms.push_back(cv::KeyPoint(kpts[i][1].item<float>(), kpts[i][0].item<float>(), 8, -1, response));
+            // std::cout << "Keypoint x: " << static_cast<int>(kpts[i][1].item<float>() * image_scale_width) << std::endl;
+            // std::cout << kpts[i][1].item<float>() << std::endl;
+            // std::cout << kpts[i][0].item<float>() << std::endl;
         }
 
         if (nms)
@@ -236,7 +279,7 @@ namespace ORB_SLAM2
             {
                 int x = keypoints_no_nms[i].pt.x;
                 int y = keypoints_no_nms[i].pt.y;
-                conf.at<float>(i, 0) = prob.at<float>(x, y);
+                conf.at<float>(i, 0) = prob[y][x].item<float>();
             }
 
             // cv::Mat descriptors;
@@ -252,139 +295,102 @@ namespace ORB_SLAM2
         {
             keypoints = keypoints_no_nms;
         }
-    }*/
-    
-    void SPDetector::getKeyPoints(float threshold, int iniX, int maxX, int iniY, int maxY, std::vector<cv::KeyPoint>& keypoints, bool nms)
-        {
-            auto prob = mProb.slice(0, iniY, maxY).slice(1, iniX, maxX);  // [h, w]
-            auto kpts = (prob > threshold);
-            kpts = torch::nonzero(kpts);  // [n_keypoints, 2]  (y, x)
-            std::vector<cv::KeyPoint> keypoints_no_nms;
-            for (int i = 0; i < kpts.size(0); i++) {
-                float response = prob[kpts[i][0]][kpts[i][1]].item<float>();
-                //std::cout << "response: "<<response <<std::endl;
-                keypoints_no_nms.push_back(cv::KeyPoint(kpts[i][1].item<float>(), kpts[i][0].item<float>(),8, -1, response));
-                //std::cout << "Keypoint x: " << static_cast<int>(kpts[i][1].item<float>() * image_scale_width) << std::endl;
-                //std::cout << kpts[i][1].item<float>() << std::endl;
-                //std::cout << kpts[i][0].item<float>() << std::endl;
-            }
+    }
 
-            if (nms) {
-                cv::Mat conf(keypoints_no_nms.size(), 1, CV_32F);
-                for (size_t i = 0; i < keypoints_no_nms.size(); i++) {
-                    int x = keypoints_no_nms[i].pt.x;
-                    int y = keypoints_no_nms[i].pt.y;
-                    conf.at<float>(i, 0) = prob[y][x].item<float>();
-                }
+    /*
+   void SPDetector::computeDescriptors(const std::vector<cv::KeyPoint> &keypoints, cv::Mat &descriptors)
+   {
+       cv::Mat kpt_mat(keypoints.size(), 2, CV_32F); // [n_keypoints, 2]  (y, x)
 
-                // cv::Mat descriptors;
+       for (size_t i = 0; i < keypoints.size(); i++)
+       {
+           kpt_mat.at<float>(i, 0) = (float)keypoints[i].pt.y;
+           kpt_mat.at<float>(i, 1) = (float)keypoints[i].pt.x;
+       }
 
-                int border = 0;
-                int dist_thresh = 4;
-                int height = maxY - iniY;
-                int width = maxX - iniX;
+       auto fkpts = kpt_mat.clone();
+       int sizes[] = {1, 1, fkpts.size[0], 2};
+       cv::Mat grid = cv::Mat::zeros(4, sizes, CV_32F);
+       // Compute the scaled and shifted version of the fkpts sub-tensors
+       cv::Mat scaled_fkpts_x = 2.0 * fkpts.colRange(1, 2).clone() / mProb.size[1] - 1;
+       cv::Mat scaled_fkpts_y = 2.0 * fkpts.colRange(0, 1).clone() / mProb.size[0] - 1;
 
-                NMS2(keypoints_no_nms, conf, keypoints, border, dist_thresh, width, height);
-            }
-            else {
-                keypoints = keypoints_no_nms;
-            }
-        }
-     /*    
+       // Slice the tensor along the second dimension to get 3D sub-tensors
+       cv::Mat sub_tensor_x(grid.size[2], 1, CV_32F, grid.ptr() + 0 * grid.size[2]);
+       cv::Mat sub_tensor_y(grid.size[2], 1, CV_32F, grid.ptr() + 1 * grid.size[2]);
+       // Copy the scaled and shifted fkpts sub-tensors to the sliced grid sub-tensors
+       scaled_fkpts_x.copyTo(sub_tensor_x.rowRange(0, scaled_fkpts_x.rows));
+       scaled_fkpts_y.copyTo(sub_tensor_y.rowRange(0, scaled_fkpts_y.rows));
+
+
+       // Compute the output size of the grid sampling operation
+       cv::Size output_size(grid.size[2], mDesc[0].size[0]);
+
+       // Create a new matrix to hold the output of the grid sampling operation
+       cv::Mat output(output_size, mDesc[0].type(), cv::Scalar(0));
+
+       // Iterate over the output rows and columns
+       for (int y = 0; y < output.rows; y++)
+       {
+           for (int x = 0; x < output.cols; x++)
+           {
+
+               // Compute the input row and column indices using the grid tensor
+               float input_y = (grid.at<cv::Vec2f>(cv::Point(x, y))[1] + 1) * 0.5 * (mDesc[0].size[1] - 1);
+               float input_x = (grid.at<cv::Vec2f>(cv::Point(x, y))[0] + 1) * 0.5 * (mDesc[0].size[2] - 1);
+
+               // Clamp the input coordinates to the valid range
+               input_y = std::max(0.0f, std::min(input_y, static_cast<float>(mDesc[0].size[1] - 1)));
+               input_x = std::max(0.0f, std::min(input_x, static_cast<float>(mDesc[0].size[2] - 1)));
+               // Perform bilinear interpolation to compute the output value
+               cv::Size patch_size(1, 1);
+               cv::Point2f patch_center(input_y, input_x);
+               cv::Mat patch;
+               cv::getRectSubPix(mDesc[0], patch_size, patch_center, patch);
+               output.at<float>(y, x) = patch.at<float>(0, 0);
+           }
+       }
+
+       cv::Mat l2_norm_colwise(output.cols, 1, CV_32F);
+       for (int i = 0; i < output.cols; i++) {
+           l2_norm_colwise.at<float>(i, 0) = cv::norm(output.col(i), cv::NORM_L2);
+       }
+
+       // Normalize the input matrix col-wise
+       cv::Mat normalized(output.size(), output.type());
+       for (int i = 0; i < output.cols; i++) {
+           output.col(i).convertTo(normalized.col(i), -1, 1.0 / l2_norm_colwise.at<float>(i,0));
+       }
+       cv::Mat transposed;
+       cv::transpose(normalized, transposed);
+       descriptors = transposed.clone();
+
+   }
+*/
+
     void SPDetector::computeDescriptors(const std::vector<cv::KeyPoint> &keypoints, cv::Mat &descriptors)
     {
         cv::Mat kpt_mat(keypoints.size(), 2, CV_32F); // [n_keypoints, 2]  (y, x)
-
         for (size_t i = 0; i < keypoints.size(); i++)
         {
             kpt_mat.at<float>(i, 0) = (float)keypoints[i].pt.y;
             kpt_mat.at<float>(i, 1) = (float)keypoints[i].pt.x;
         }
-
-        auto fkpts = kpt_mat.clone();
-        int sizes[] = {1, 1, fkpts.size[0], 2};
-        cv::Mat grid = cv::Mat::zeros(4, sizes, CV_32F);
-        // Compute the scaled and shifted version of the fkpts sub-tensors
-        cv::Mat scaled_fkpts_x = 2.0 * fkpts.colRange(1, 2).clone() / mProb.size[1] - 1;
-        cv::Mat scaled_fkpts_y = 2.0 * fkpts.colRange(0, 1).clone() / mProb.size[0] - 1;
-
-        // Slice the tensor along the second dimension to get 3D sub-tensors
-        cv::Mat sub_tensor_x(grid.size[2], 1, CV_32F, grid.ptr() + 0 * grid.size[2]);
-        cv::Mat sub_tensor_y(grid.size[2], 1, CV_32F, grid.ptr() + 1 * grid.size[2]);
-        // Copy the scaled and shifted fkpts sub-tensors to the sliced grid sub-tensors
-        scaled_fkpts_x.copyTo(sub_tensor_x.rowRange(0, scaled_fkpts_x.rows));
-        scaled_fkpts_y.copyTo(sub_tensor_y.rowRange(0, scaled_fkpts_y.rows));
-        
-
-        // Compute the output size of the grid sampling operation
-        cv::Size output_size(grid.size[2], mDesc[0].size[0]);
-
-        // Create a new matrix to hold the output of the grid sampling operation
-        cv::Mat output(output_size, mDesc[0].type(), cv::Scalar(0));
-
-        // Iterate over the output rows and columns
-        for (int y = 0; y < output.rows; y++)
-        {
-            for (int x = 0; x < output.cols; x++)
-            {
-
-                // Compute the input row and column indices using the grid tensor
-                float input_y = (grid.at<cv::Vec2f>(cv::Point(x, y))[1] + 1) * 0.5 * (mDesc[0].size[1] - 1);
-                float input_x = (grid.at<cv::Vec2f>(cv::Point(x, y))[0] + 1) * 0.5 * (mDesc[0].size[2] - 1);
-                
-                // Clamp the input coordinates to the valid range
-                input_y = std::max(0.0f, std::min(input_y, static_cast<float>(mDesc[0].size[1] - 1)));
-                input_x = std::max(0.0f, std::min(input_x, static_cast<float>(mDesc[0].size[2] - 1)));
-                // Perform bilinear interpolation to compute the output value
-                cv::Size patch_size(1, 1);
-                cv::Point2f patch_center(input_y, input_x);
-                cv::Mat patch;
-                cv::getRectSubPix(mDesc[0], patch_size, patch_center, patch);
-                output.at<float>(y, x) = patch.at<float>(0, 0);
-            }
-        }
-        
-        cv::Mat l2_norm_colwise(output.cols, 1, CV_32F);
-        for (int i = 0; i < output.cols; i++) {
-            l2_norm_colwise.at<float>(i, 0) = cv::norm(output.col(i), cv::NORM_L2);
-        }
-
-        // Normalize the input matrix col-wise
-        cv::Mat normalized(output.size(), output.type());
-        for (int i = 0; i < output.cols; i++) {
-            output.col(i).convertTo(normalized.col(i), -1, 1.0 / l2_norm_colwise.at<float>(i,0));
-        }
-        cv::Mat transposed;
-        cv::transpose(normalized, transposed);
-        descriptors = transposed.clone();
-
-    }
-*/
-    
-    void SPDetector::computeDescriptors(const std::vector<cv::KeyPoint>& keypoints, cv::Mat& descriptors)
-    {
-        cv::Mat kpt_mat(keypoints.size(), 2, CV_32F);  // [n_keypoints, 2]  (y, x)
-
-        for (size_t i = 0; i < keypoints.size(); i++) {
-            kpt_mat.at<float>(i, 0) = (float)keypoints[i].pt.y;
-            kpt_mat.at<float>(i, 1) = (float)keypoints[i].pt.x;
-        }
-
-        auto fkpts = torch::from_blob(kpt_mat.data, { keypoints.size(), 2 }, torch::kFloat);
-        std::cout << "Keypoints: " << keypoints.size() << std::endl;
-        auto grid = torch::zeros({ 1, 1, fkpts.size(0), 2 });  // [1, 1, n_keypoints, 2]
-        grid[0][0].slice(1, 0, 1) = 2.0 * fkpts.slice(1, 1, 2) / mProb.size(1) - 1;  // x
-        grid[0][0].slice(1, 1, 2) = 2.0 * fkpts.slice(1, 0, 1) / mProb.size(0) - 1;  // y
-        auto desc = torch::grid_sampler(mDesc, grid, 0, 0, false);  // [1, 256, 1, n_keypoints]
-        desc = desc.squeeze(0).squeeze(1);  // [256, n_keypoints]
+        auto fkpts = torch::from_blob(kpt_mat.data, {keypoints.size(), 2}, torch::kFloat);
+        //std::cout << "Keypoints: " << keypoints.size() << std::endl;
+        auto grid = torch::zeros({1, 1, fkpts.size(0), 2});                         // [1, 1, n_keypoints, 2]
+        grid[0][0].slice(1, 0, 1) = 2.0 * fkpts.slice(1, 1, 2) / mProb.size(1) - 1; // x
+        grid[0][0].slice(1, 1, 2) = 2.0 * fkpts.slice(1, 0, 1) / mProb.size(0) - 1; // y
+        auto desc = torch::grid_sampler(mDesc, grid, 0, 0, false);                  // [1, 256, 1, n_keypoints]
+        desc = desc.squeeze(0).squeeze(1);                                          // [256, n_keypoints]
         // normalize to 1
         auto dn = torch::norm(desc, 2, 1);
         desc = desc.div(torch::unsqueeze(dn, 1));
-        desc = desc.transpose(0, 1).contiguous();  // [n_keypoints, 256]
-        desc = desc.to(torch::kCPU);
+        desc = desc.transpose(0, 1).contiguous(); // [n_keypoints, 256]
+        // desc = desc.to(torch::kCPU);
 
         cv::Mat desc_mat(cv::Size(desc.size(1), desc.size(0)), CV_32FC1, desc.data_ptr<float>());
-        std::cout <<"desc_mat: "<< desc_mat.size()<<std::endl;
+        //std::cout << "desc_mat: " << desc_mat.size() << std::endl;
         descriptors = desc_mat.clone();
     }
 

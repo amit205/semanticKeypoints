@@ -115,11 +115,17 @@ namespace ORB_SLAM2
         model_engine2 = make_shared<SuperPoint>(options);
         model_engine3 = make_shared<SuperPoint>(options);
         model_engine4 = make_shared<SuperPoint>(options);
+        model_engine5 = make_shared<SuperPoint>(options);
+        model_engine6 = make_shared<SuperPoint>(options);
+        model_engine7 = make_shared<SuperPoint>(options);
+        model_engine8 = make_shared<SuperPoint>(options);
      
         // Engine engine_semanticKeypoints(options);
         // TODO: Specify your model here.
         // Must specify a dynamic batch size when exporting the model from onnx.
-        const std::string onnxModelpath_semanticKeypoints = "SuperPoint-010423.onnx";
+        const std::string onnxModelpath_semanticKeypoints = "inference-model-superpoint-kitti360-100723.onnx";
+        //const std::string onnxModelpath_semanticKeypoints = "inference-model-superpoint-kitti360-01092022.onnx";
+        //const std::string onnxModelpath_semanticKeypoints = "inference-model-superpoint-coco-07042022.onnx";
         int level = 0;
         std::cout << "Building engine and loading network for level: "<<level<<std::endl;
         bool succ = model_engine1->build(onnxModelpath_semanticKeypoints, level);
@@ -168,9 +174,56 @@ namespace ORB_SLAM2
         {
             throw std::runtime_error("Unable to load TRT semanticKeypoints engine.");
         }
+        level = level + 1;
+        succ = model_engine5->build(onnxModelpath_semanticKeypoints, level);
+        if (!succ)
+        {
+            throw std::runtime_error("Unable to build TRT semanticKeypoints engine.");
+        }
+        succ = model_engine5->loadNetwork();
+        if (!succ)
+        {
+            throw std::runtime_error("Unable to load TRT semanticKeypoints engine.");
+        }
+        level = level + 1;
+        succ = model_engine6->build(onnxModelpath_semanticKeypoints, level);
+        if (!succ)
+        {
+            throw std::runtime_error("Unable to build TRT semanticKeypoints engine.");
+        }
+        succ = model_engine6->loadNetwork();
+        if (!succ)
+        {
+            throw std::runtime_error("Unable to load TRT semanticKeypoints engine.");
+        }
+        level = level + 1;
+        succ = model_engine7->build(onnxModelpath_semanticKeypoints, level);
+        if (!succ)
+        {
+            throw std::runtime_error("Unable to build TRT semanticKeypoints engine.");
+        }
+        succ = model_engine7->loadNetwork();
+        if (!succ)
+        {
+            throw std::runtime_error("Unable to load TRT semanticKeypoints engine.");
+        }
+        level = level + 1;
+        succ = model_engine8->build(onnxModelpath_semanticKeypoints, level);
+        if (!succ)
+        {
+            throw std::runtime_error("Unable to build TRT semanticKeypoints engine.");
+        }
+        succ = model_engine8->loadNetwork();
+        if (!succ)
+        {
+            throw std::runtime_error("Unable to load TRT semanticKeypoints engine.");
+        }
+        
+        /*
         if (nlevels !=level+1){
             throw std::runtime_error("Failed to build engine and load all the networks");
-        }
+        }*/
+
         mvScaleFactor.resize(nlevels);
         mvLevelSigma2.resize(nlevels);
         mvScaleFactor[0] = 1.0f;
@@ -555,6 +608,10 @@ namespace ORB_SLAM2
         SPDetector detector2(model_engine2);
         SPDetector detector3(model_engine3);
         SPDetector detector4(model_engine4);
+        SPDetector detector5(model_engine5);
+        SPDetector detector6(model_engine6);
+        SPDetector detector7(model_engine7);
+        SPDetector detector8(model_engine8);
         for (int level = 0; level < nlevels; ++level)
         {
             // SPDetector detector(model);  // semanticKeypoints here
@@ -578,6 +635,26 @@ namespace ORB_SLAM2
                 case 3:
                 {
                     detector4.detect(mvImagePyramid[level], false, level);
+                    break;
+                }
+                case 4:
+                {
+                    detector5.detect(mvImagePyramid[level], false, level);
+                    break;
+                }
+                case 5:
+                {
+                    detector6.detect(mvImagePyramid[level], false, level);
+                    break;
+                }
+                case 6:
+                {
+                    detector7.detect(mvImagePyramid[level], false, level);
+                    break;
+                }
+                case 7:
+                {
+                    detector8.detect(mvImagePyramid[level], false, level);
                     break;
                 }
                     }
@@ -644,6 +721,26 @@ namespace ORB_SLAM2
                             detector4.getKeyPoints(iniThFAST, iniX, maxX, iniY, maxY, vKeysCell, true);
                             break;
                         }
+                        case 4:
+                        {
+                            detector5.getKeyPoints(iniThFAST, iniX, maxX, iniY, maxY, vKeysCell, true);
+                            break;
+                        }
+                        case 5:
+                        {
+                            detector6.getKeyPoints(iniThFAST, iniX, maxX, iniY, maxY, vKeysCell, true);
+                            break;
+                        }
+                        case 6:
+                        {
+                            detector7.getKeyPoints(iniThFAST, iniX, maxX, iniY, maxY, vKeysCell, true);
+                            break;
+                        }
+                        case 7:
+                        {
+                            detector8.getKeyPoints(iniThFAST, iniX, maxX, iniY, maxY, vKeysCell, true);
+                            break;
+                        }
                     }
 
                     // semantic keypoints above
@@ -686,6 +783,26 @@ namespace ORB_SLAM2
                         case 3:
                         {
                             detector4.getKeyPoints(minThFAST, iniX, maxX, iniY, maxY, vKeysCell, true);
+                            break;
+                        }
+                        case 4:
+                        {
+                            detector5.getKeyPoints(minThFAST, iniX, maxX, iniY, maxY, vKeysCell, true);
+                            break;
+                        }
+                        case 5:
+                        {
+                            detector6.getKeyPoints(minThFAST, iniX, maxX, iniY, maxY, vKeysCell, true);
+                            break;
+                        }
+                        case 6:
+                        {
+                            detector7.getKeyPoints(minThFAST, iniX, maxX, iniY, maxY, vKeysCell, true);
+                            break;
+                        }
+                        case 7:
+                        {
+                            detector8.getKeyPoints(minThFAST, iniX, maxX, iniY, maxY, vKeysCell, true);
                             break;
                         }
                     }
@@ -758,6 +875,26 @@ namespace ORB_SLAM2
                         case 3:
                         {
                             detector4.computeDescriptors(keypoints, desc);
+                            break;
+                        }
+                        case 4:
+                        {
+                            detector5.computeDescriptors(keypoints, desc);
+                            break;
+                        }
+                        case 5:
+                        {
+                            detector6.computeDescriptors(keypoints, desc);
+                            break;
+                        }
+                        case 6:
+                        {
+                            detector7.computeDescriptors(keypoints, desc);
+                            break;
+                        }
+                        case 7:
+                        {
+                            detector8.computeDescriptors(keypoints, desc);
                             break;
                         }
                     }

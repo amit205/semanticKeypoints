@@ -106,7 +106,8 @@ if __name__ == '__main__':
   #Path to the KeyFrameTrajectory.txt file
 	# path = sys.argv[1]
 	# res_time = np.loadtxt(sys.argv[1])
-	res_time = np.loadtxt('/spslam/semanticKeypoints/KeyFrameTrajectory.txt')  
+	#res_time = np.loadtxt('/spslam/Results/Ours_SuperPoint/KeyFrameTrajectory05_mono.txt')
+	res_time = np.loadtxt('/spslam/semanticKeypoints/KeyFrameTrajectory.txt')
   #Path to the ground truth file
 	ground_data = np.loadtxt('/spslam/kitti-odometry-gray/poses/07.txt')
 	data= gen_data(ground_time, res_time, ground_data)

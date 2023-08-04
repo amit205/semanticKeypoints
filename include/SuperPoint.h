@@ -37,6 +37,10 @@ namespace ORB_SLAM2
         std::shared_ptr<SuperPoint> model_engine2;
         std::shared_ptr<SuperPoint> model_engine3;
         std::shared_ptr<SuperPoint> model_engine4;
+        std::shared_ptr<SuperPoint> model_engine5;
+        std::shared_ptr<SuperPoint> model_engine6;
+        std::shared_ptr<SuperPoint> model_engine7;
+        std::shared_ptr<SuperPoint> model_engine8;
         torch::Tensor mProb;
         torch::Tensor mDesc;
         float image_scale_width;

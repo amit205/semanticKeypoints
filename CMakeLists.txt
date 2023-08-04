@@ -9,11 +9,11 @@ MESSAGE("Build type: " ${CMAKE_BUILD_TYPE})
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}  -Wall  -O3 -march=native ")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall   -O3 -march=native")
-set(OpenCV_DIR "~/opencv/build")
-set(Torch_DIR "/spslam/pytorch/torch/share/cmake/Torch")  # libtorch
-#set(Pangolin_DIR "/spslam/Pangolin/build")
-set(Pangolin_DIR "/spslam/Pangolin-0.5/Pangolin/build/src")
-set(TensorRT_DIR ~/TensorRT/)
+set(OpenCV_DIR "~/build")
+set(Torch_DIR "~/pytorch/torch/share/cmake/Torch")  # libtorch
+set(Pangolin_DIR "~/Pangolin/build")
+#set(Pangolin_DIR "/spslam/Pangolin-0.5/Pangolin/build/src")
+set(TensorRT_DIR "~/TensorRT-8.6.1.6/")
 # Use the correct version of CUDA
 set(CUDA_TOOLKIT_ROOT_DIR /usr/local/cuda)
 # Check C++14 or C++0x support
@@ -137,6 +137,10 @@ target_link_libraries(mono_tum ${PROJECT_NAME})
 add_executable(mono_kitti
 Examples/Monocular/mono_kitti.cc)
 target_link_libraries(mono_kitti ${PROJECT_NAME})
+
+add_executable(mono_kitti360
+Examples/Monocular/mono_kitti360.cc)
+target_link_libraries(mono_kitti360 ${PROJECT_NAME})
 
 add_executable(mono_euroc
 Examples/Monocular/mono_euroc.cc)
