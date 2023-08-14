@@ -30,42 +30,6 @@ namespace ORB_SLAM2
     {
     }
 
-    void channelsLastToChannelsFirst(cv::Mat &input, cv::Mat &output)
-    {
-        // Check if the input has 256 channels
-        if (input.size[2] != 256)
-        {
-            std::cerr << "Error: The input image must have 3 channels." << std::endl;
-            return;
-        }
-
-        // Get the input image dimensions
-        int height = input.size[0];
-        int width = input.size[1];
-        // Create a vector of cv::Mat objects (assuming 256 channels)
-        std::vector<cv::Mat> channels(256, cv::Mat(height, width, CV_32F, cv::Scalar(0)));
-        cv::Mat tmp_image;
-        tmp_image = input.clone();
-        for (int i = 0; i < 256; i++)
-        {
-            tmp_image({cv::Range::all(), cv::Range::all(), cv::Range(i, i + 1)}).copyTo(channels[i]);
-            // std::cout<< channels[i].size() << std::endl;
-        }
-
-        // Copy each 2D cv::Mat in the vector to the corresponding slice of the 3D cv::Mat
-        for (int i = 0; i < 256; i++)
-        {
-            for (int y = 0; y < channels[i].rows; y++)
-            {
-                for (int x = 0; x < channels[i].cols; x++)
-                {
-                    output.at<float>(i, y, x) = channels[i].at<float>(y, x);
-                }
-            }
-        }
-        // cv::merge(channels, output);
-    }
-
     void SPDetector::detect(cv::Mat &img, bool cuda, int level)
 
     {
@@ -82,7 +46,7 @@ namespace ORB_SLAM2
         // comment out following if loading SuperPoint model
         // featureVectors_segmentation.clear();
         images.clear();
-        //std::cout << "Image size: " << img.size() << std::endl;
+        // std::cout << "Image size: " << img.size() << std::endl;
         cv::Mat imgConvert;
         img.convertTo(imgConvert, CV_32F, 1.f / 255.f);
         int width = img.cols;
@@ -91,9 +55,9 @@ namespace ORB_SLAM2
         int height_c = height / 8;
         cv::Mat imgResized;
         cv::resize(imgConvert, imgResized, cv::Size(width_c * 8, height_c * 8), cv::INTER_LINEAR);
-        //std::cout << "Resized Image size: " << imgResized.size() << std::endl;
-        // cv::imshow("Input",imgResized);
-        // cv::waitKey(1);
+        // std::cout << "Resized Image size: " << imgResized.size() << std::endl;
+        //  cv::imshow("Input",imgResized);
+        //  cv::waitKey(1);
         images.push_back(imgResized);
         bool succ;
 
@@ -187,21 +151,10 @@ namespace ORB_SLAM2
         cv::Mat detectorImg(2, featureVectors_detector[0].size, CV_32FC1, featureVectors_detector[0].data);
         // std::cout << "Detector output size: "<<detectorImg.size() << std::endl;
         cv::resize(detectorImg, detectorImg, cv::Size(width, height), cv::INTER_LINEAR);
-        // std::cout<<"Resized detector output size: " << detectorImg.size() << std::endl;
-        // cv::imshow("Keypoints",detectorImg>0.015);
-        // cv::waitKey(0);
-        //  seg_images.push_back(segImg);
-        //   Convert the input image from channels last to channels first
-        // int sizes[3] = {256, 30, 40};
-        // cv::Mat outputx(3, sizes, CV_32F, cv::Scalar(0));
-        // channelsLastToChannelsFirst(descriptorImg_raw, outputx);
-        // mProb = detectorImg.clone();
-        // mDesc.push_back(outputx);
-
 
         mProb = torch::zeros({detectorImg.size[0], detectorImg.size[1]}, torch::kF32).to(device);
         mDesc = torch::zeros({descriptorImg_raw.size[0], descriptorImg_raw.size[1], descriptorImg_raw.size[2]}, torch::kF32).to(device);
-       
+
         mProb = mProb.set_requires_grad(false);
         mDesc = mDesc.set_requires_grad(false);
         std::memcpy(mProb.data_ptr(), detectorImg.data, sizeof(float) * mProb.numel());
@@ -213,49 +166,6 @@ namespace ORB_SLAM2
         mDesc = mDesc.div(torch::unsqueeze(dn, 1));
     }
 
-    /*    void SPDetector::getKeyPoints(float threshold, int iniX, int maxX, int iniY, int maxY, std::vector<cv::KeyPoint>& keypoints, bool nms)
-        {
-
-            auto prob = mProb(cv::Range(iniY, maxY), cv::Range(iniX, maxX)).clone();
-            cv::Mat kpts;
-            cv::threshold(prob, kpts, threshold, 1, cv::THRESH_BINARY);
-            // Find non-zero pixel locations
-            std::vector<cv::Point> non_zero_pixels;
-            cv::findNonZero(kpts, non_zero_pixels);
-
-            std::vector<cv::KeyPoint> keypoints_no_nms;
-            for (int i = 0; i < non_zero_pixels.size(); i++)
-            {
-                float response = prob.at<float>(non_zero_pixels[i]);
-                // std::cout << response << std::endl;
-                keypoints_no_nms.push_back(cv::KeyPoint(non_zero_pixels[i].x, non_zero_pixels[i].y, 8, -1, response));
-            }
-
-            if (nms)
-            {
-                cv::Mat conf(keypoints_no_nms.size(), 1, CV_32F);
-                for (size_t i = 0; i < keypoints_no_nms.size(); i++)
-                {
-                    int x = keypoints_no_nms[i].pt.x;
-                    int y = keypoints_no_nms[i].pt.y;
-                    conf.at<float>(i, 0) = prob.at<float>(y, x);
-                }
-
-                // cv::Mat descriptors;
-
-                int border = 0;
-                int dist_thresh = 4;
-                int height = maxY - iniY;
-                int width = maxX - iniX;
-
-                NMS2(keypoints_no_nms, conf, keypoints, border, dist_thresh, width, height);
-            }
-            else
-            {
-                keypoints = keypoints_no_nms;
-            }
-        }*/
-
     void SPDetector::getKeyPoints(float threshold, int iniX, int maxX, int iniY, int maxY, std::vector<cv::KeyPoint> &keypoints, bool nms)
     {
         auto prob = mProb.slice(0, iniY, maxY).slice(1, iniX, maxX); // [h, w]
@@ -265,11 +175,7 @@ namespace ORB_SLAM2
         for (int i = 0; i < kpts.size(0); i++)
         {
             float response = prob[kpts[i][0]][kpts[i][1]].item<float>();
-            // std::cout << "response: "<<response <<std::endl;
             keypoints_no_nms.push_back(cv::KeyPoint(kpts[i][1].item<float>(), kpts[i][0].item<float>(), 8, -1, response));
-            // std::cout << "Keypoint x: " << static_cast<int>(kpts[i][1].item<float>() * image_scale_width) << std::endl;
-            // std::cout << kpts[i][1].item<float>() << std::endl;
-            // std::cout << kpts[i][0].item<float>() << std::endl;
         }
 
         if (nms)
@@ -297,77 +203,6 @@ namespace ORB_SLAM2
         }
     }
 
-    /*
-   void SPDetector::computeDescriptors(const std::vector<cv::KeyPoint> &keypoints, cv::Mat &descriptors)
-   {
-       cv::Mat kpt_mat(keypoints.size(), 2, CV_32F); // [n_keypoints, 2]  (y, x)
-
-       for (size_t i = 0; i < keypoints.size(); i++)
-       {
-           kpt_mat.at<float>(i, 0) = (float)keypoints[i].pt.y;
-           kpt_mat.at<float>(i, 1) = (float)keypoints[i].pt.x;
-       }
-
-       auto fkpts = kpt_mat.clone();
-       int sizes[] = {1, 1, fkpts.size[0], 2};
-       cv::Mat grid = cv::Mat::zeros(4, sizes, CV_32F);
-       // Compute the scaled and shifted version of the fkpts sub-tensors
-       cv::Mat scaled_fkpts_x = 2.0 * fkpts.colRange(1, 2).clone() / mProb.size[1] - 1;
-       cv::Mat scaled_fkpts_y = 2.0 * fkpts.colRange(0, 1).clone() / mProb.size[0] - 1;
-
-       // Slice the tensor along the second dimension to get 3D sub-tensors
-       cv::Mat sub_tensor_x(grid.size[2], 1, CV_32F, grid.ptr() + 0 * grid.size[2]);
-       cv::Mat sub_tensor_y(grid.size[2], 1, CV_32F, grid.ptr() + 1 * grid.size[2]);
-       // Copy the scaled and shifted fkpts sub-tensors to the sliced grid sub-tensors
-       scaled_fkpts_x.copyTo(sub_tensor_x.rowRange(0, scaled_fkpts_x.rows));
-       scaled_fkpts_y.copyTo(sub_tensor_y.rowRange(0, scaled_fkpts_y.rows));
-
-
-       // Compute the output size of the grid sampling operation
-       cv::Size output_size(grid.size[2], mDesc[0].size[0]);
-
-       // Create a new matrix to hold the output of the grid sampling operation
-       cv::Mat output(output_size, mDesc[0].type(), cv::Scalar(0));
-
-       // Iterate over the output rows and columns
-       for (int y = 0; y < output.rows; y++)
-       {
-           for (int x = 0; x < output.cols; x++)
-           {
-
-               // Compute the input row and column indices using the grid tensor
-               float input_y = (grid.at<cv::Vec2f>(cv::Point(x, y))[1] + 1) * 0.5 * (mDesc[0].size[1] - 1);
-               float input_x = (grid.at<cv::Vec2f>(cv::Point(x, y))[0] + 1) * 0.5 * (mDesc[0].size[2] - 1);
-
-               // Clamp the input coordinates to the valid range
-               input_y = std::max(0.0f, std::min(input_y, static_cast<float>(mDesc[0].size[1] - 1)));
-               input_x = std::max(0.0f, std::min(input_x, static_cast<float>(mDesc[0].size[2] - 1)));
-               // Perform bilinear interpolation to compute the output value
-               cv::Size patch_size(1, 1);
-               cv::Point2f patch_center(input_y, input_x);
-               cv::Mat patch;
-               cv::getRectSubPix(mDesc[0], patch_size, patch_center, patch);
-               output.at<float>(y, x) = patch.at<float>(0, 0);
-           }
-       }
-
-       cv::Mat l2_norm_colwise(output.cols, 1, CV_32F);
-       for (int i = 0; i < output.cols; i++) {
-           l2_norm_colwise.at<float>(i, 0) = cv::norm(output.col(i), cv::NORM_L2);
-       }
-
-       // Normalize the input matrix col-wise
-       cv::Mat normalized(output.size(), output.type());
-       for (int i = 0; i < output.cols; i++) {
-           output.col(i).convertTo(normalized.col(i), -1, 1.0 / l2_norm_colwise.at<float>(i,0));
-       }
-       cv::Mat transposed;
-       cv::transpose(normalized, transposed);
-       descriptors = transposed.clone();
-
-   }
-*/
-
     void SPDetector::computeDescriptors(const std::vector<cv::KeyPoint> &keypoints, cv::Mat &descriptors)
     {
         cv::Mat kpt_mat(keypoints.size(), 2, CV_32F); // [n_keypoints, 2]  (y, x)
@@ -377,7 +212,7 @@ namespace ORB_SLAM2
             kpt_mat.at<float>(i, 1) = (float)keypoints[i].pt.x;
         }
         auto fkpts = torch::from_blob(kpt_mat.data, {keypoints.size(), 2}, torch::kFloat);
-        //std::cout << "Keypoints: " << keypoints.size() << std::endl;
+        // std::cout << "Keypoints: " << keypoints.size() << std::endl;
         auto grid = torch::zeros({1, 1, fkpts.size(0), 2});                         // [1, 1, n_keypoints, 2]
         grid[0][0].slice(1, 0, 1) = 2.0 * fkpts.slice(1, 1, 2) / mProb.size(1) - 1; // x
         grid[0][0].slice(1, 1, 2) = 2.0 * fkpts.slice(1, 0, 1) / mProb.size(0) - 1; // y
@@ -390,7 +225,7 @@ namespace ORB_SLAM2
         // desc = desc.to(torch::kCPU);
 
         cv::Mat desc_mat(cv::Size(desc.size(1), desc.size(0)), CV_32FC1, desc.data_ptr<float>());
-        //std::cout << "desc_mat: " << desc_mat.size() << std::endl;
+        // std::cout << "desc_mat: " << desc_mat.size() << std::endl;
         descriptors = desc_mat.clone();
     }
 

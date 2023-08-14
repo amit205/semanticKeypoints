@@ -21,8 +21,6 @@ namespace ORB_SLAM2
     //cv::Mat SPdetect(std::shared_ptr<SuperPoint> model, cv::Mat img, std::vector<cv::KeyPoint>& keypoints, double threshold, bool nms, bool cuda);
     //cv::Mat SPdetect(std::shared_ptr<SuperPoint> model_engine, cv::Mat img, std::vector<cv::KeyPoint>& keypoints, double threshold, bool nms, bool cuda);
     //torch::Tensor NMS(torch::Tensor kpts);
-    void channelsLastToChannelsFirst(cv::Mat& input, cv::Mat& output);
-
     class SPDetector {
     public:
         SPDetector(std::shared_ptr<SuperPoint> _model_engine);
@@ -45,8 +43,6 @@ namespace ORB_SLAM2
         torch::Tensor mDesc;
         float image_scale_width;
         float image_scale_height;
-        //cv::Mat mProb;
-        //std::vector<cv::Mat> mDesc;
     };
 }  // ORB_SLAM
 

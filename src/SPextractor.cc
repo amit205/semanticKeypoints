@@ -917,7 +917,7 @@ namespace ORB_SLAM2
             return;
 
         Mat image = _image.getMat();
-        assert(image.type() == CV_8UC1);
+        assert(image.type() == CV_32F);
 
         Mat descriptors;
 

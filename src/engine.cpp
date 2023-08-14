@@ -94,50 +94,50 @@ bool Engine::build(std::string onnxModelPath, int level) {
         case 0:
           //  inputH = 370;
           //  inputW = 1226;
-            inputH = 376; //kitti360 //368;//kitti
-            inputW = 1408;//kitti360  1224;//kitti
+            inputH = 368;
+            inputW = 1224;
             break;
         case 1:
           //  inputH = 308;
           //  inputW = 1022;
-            inputH = 312; //304;
-            inputW = 1168; //1016;
+            inputH = 304;
+            inputW = 1016;
             break;
         case 2:
           //  inputH = 257;
           //  inputW = 851;
             inputH = 256;
-            inputW = 976; //848;
+            inputW = 848;
             break;
         case 3:
           //  inputH = 214;
           //  inputW = 709;
-            inputH = 216; //208;
-            inputW = 808; //704;
+            inputH = 208;
+            inputW = 704;
             break;
         case 4: 
           //  inputH = 178;
           //  inputW = 591;
             inputH = 176;
-            inputW = 672; //584;
+            inputW = 584;
             break;
         case 5:
           //  inputH = 149;
           //  inputW = 493;
             inputH = 144;
-            inputW = 560;//488;
+            inputW = 488;
             break;
         case 6:
           //  inputH = 124;
           //  inputW = 411;
             inputH = 120;
-            inputW = 472; //408;
+            inputW = 408;
             break;
         case 7:
           //  inputH = 103;
           //  inputW = 342;
-            inputH = 104; //96;
-            inputW = 392;//336;
+            inputH = 96;
+            inputW = 336;
             break;
     }
     auto config = TRTUniquePtr<nvinfer1::IBuilderConfig>(builder->createBuilderConfig());
